@@ -1,21 +1,43 @@
-import { Main } from "@/sections/Main";
+import React, { useState } from "react";
 import type { VerificationResult } from "@/App";
+import { Main } from "@/sections/Main";
 
-export type FormProps = {
+type FormProps = {
   onVerificationComplete: (result: VerificationResult) => void;
   verificationResult: VerificationResult | null;
-  onAdminPasswordDetected?: () => void;
+  onAdminPasswordDetected?: (password: string) => void;
 };
 
-export const Form = (props: FormProps) => {
+export const Form = ({
+  onVerificationComplete,
+  verificationResult,
+  onAdminPasswordDetected,
+}: FormProps) => {
+  const [folioFiscal, setFolioFiscal] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // 👉 SI ES CONTRASEÑA ADMIN, LA PASAMOS TAL CUAL
+    if (onAdminPasswordDetected) {
+      onAdminPasswordDetected(folioFiscal);
+      return;
+    }
+
+    // flujo normal CFDI (temporal)
+    onVerificationComplete({
+      status: "invalid",
+      folioFiscal,
+    });
+  };
+
   return (
-    <div role="form" className="box-border caret-transparent">
-      {/* 🚫 NO <form> AQUÍ */}
+    <form onSubmit={handleSubmit} className="box-border">
       <Main
-        onVerificationComplete={props.onVerificationComplete}
-        verificationResult={props.verificationResult}
-        onAdminPasswordDetected={props.onAdminPasswordDetected}
+        folioFiscal={folioFiscal}
+        setFolioFiscal={setFolioFiscal}
+        verificationResult={verificationResult}
       />
-    </div>
+    </form>
   );
 };
