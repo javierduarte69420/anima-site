@@ -4,9 +4,10 @@ import { Form } from "@/sections/Form";
 import { Footer } from "@/sections/Footer";
 import { Result } from "@/sections/Result";
 import { Admin } from "@/sections/Admin";
+import { supabase } from "@/lib/supabase";
 
 export type VerificationResult = {
-  status: 'valid' | 'invalid';
+  status: "valid" | "invalid";
   folioFiscal: string;
   rfcEmisor: string;
   rfcReceptor: string;
@@ -23,9 +24,62 @@ export type VerificationResult = {
 
 export const App = () => {
   const [showResult, setShowResult] = useState(false);
-  const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
+  const [verificationResult, setVerificationResult] =
+    useState<VerificationResult | null>(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
+  /**
+   * 🔍 LECTURA AUTOMÁTICA DESDE QR (?id=FOLIO)
+   */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const folioFiscal = params.get("id");
+
+    if (!folioFiscal) return;
+
+    const fetchFromSupabase = async () => {
+      const { data, error } = await supabase
+        .from("cfdi_verifications")
+        .select("*")
+        .eq("folio_fiscal", folioFiscal)
+        .single();
+
+      if (error || !data) {
+        setVerificationResult({
+          status: "invalid",
+          folioFiscal,
+          rfcEmisor: "",
+          rfcReceptor: "",
+        });
+        setShowResult(true);
+        return;
+      }
+
+      setVerificationResult({
+        status: data.status,
+        folioFiscal: data.folio_fiscal,
+        rfcEmisor: data.rfc_emisor,
+        rfcReceptor: data.rfc_receptor,
+        total: data.total?.toString(),
+        fechaEmision: data.fecha_emision,
+        fechaCertificacion: data.fecha_certificacion,
+        pacCertificador: data.pac_certificador,
+        nombreEmisor: data.nombre_emisor,
+        nombreReceptor: data.nombre_receptor,
+        efectoComprobante: data.efecto_comprobante,
+        estadoCfdi: data.estado_cfdi,
+        estatusCancelacion: data.estatus_cancelacion,
+      });
+
+      setShowResult(true);
+    };
+
+    fetchFromSupabase();
+  }, []);
+
+  /**
+   * 🧾 CUANDO EL FORM TERMINA UNA BÚSQUEDA NORMAL
+   */
   const handleVerificationComplete = (result: VerificationResult) => {
     setVerificationResult(result);
     setShowResult(true);
@@ -34,8 +88,12 @@ export const App = () => {
   const handleNewSearch = () => {
     setShowResult(false);
     setVerificationResult(null);
+    window.history.replaceState({}, "", window.location.pathname);
   };
 
+  /**
+   * 🛠 ADMIN
+   */
   const handleAdminUpdate = (result: VerificationResult) => {
     setVerificationResult(result);
   };
@@ -45,21 +103,15 @@ export const App = () => {
   };
 
   return (
-    <body className="text-neutral-700 text-lg not-italic normal-nums font-light accent-auto bg-white box-border caret-transparent block tracking-[normal] leading-[25.7143px] list-outside list-disc pointer-events-auto text-start indent-[0px] normal-case visible pt-30 md:pt-34 border-separate font-noto_sans overflow-x-hidden">
+    <body className="text-neutral-700 text-lg not-italic normal-nums font-light bg-white overflow-x-hidden">
       <Header />
-      <div className="box-border caret-transparent hidden pointer-events-none">
-        <div className="fixed bg-red-700 box-border caret-transparent h-0.5 w-full z-[2000] right-full top-0">
-          <div className="box-border caret-transparent"></div>
-        </div>
-        <div className="box-border caret-transparent"></div>
-      </div>
-      
-      <Form 
+
+      <Form
         onVerificationComplete={handleVerificationComplete}
         verificationResult={showResult ? verificationResult : null}
         onAdminPasswordDetected={handleAdminPasswordDetected}
       />
-      
+
       <Footer />
 
       {showAdminPanel && (
