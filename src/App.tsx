@@ -20,6 +20,23 @@ export type VerificationResult = {
   estatusCancelacion?: string;
 };
 
+// ✅ OBJETO SEGURO PARA ADMIN
+const EMPTY_ADMIN_RESULT: VerificationResult = {
+  status: "valid",
+  folioFiscal: "",
+  rfcEmisor: "",
+  rfcReceptor: "",
+  total: "",
+  fechaEmision: "",
+  fechaCertificacion: "",
+  pacCertificador: "",
+  nombreEmisor: "",
+  nombreReceptor: "",
+  efectoComprobante: "",
+  estadoCfdi: "",
+  estatusCancelacion: "",
+};
+
 export const App = () => {
   const [verificationResult, setVerificationResult] =
     useState<VerificationResult | null>(null);
@@ -37,7 +54,7 @@ export const App = () => {
           }}
           verificationResult={verificationResult}
           onAdminPasswordDetected={() => {
-            // 🔓 ADMIN YA NO REQUIERE CFDI
+            // 🔓 ABRIR ADMIN SIN CFDI
             setShowAdminPanel(true);
           }}
         />
@@ -45,7 +62,7 @@ export const App = () => {
         <Footer />
       </div>
 
-      {/* ADMIN OVERLAY */}
+      {/* 🔐 ADMIN PANEL (NUNCA NULL) */}
       {showAdminPanel && (
         <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
           <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
@@ -57,7 +74,7 @@ export const App = () => {
             </button>
 
             <Admin
-              verificationResult={verificationResult}
+              verificationResult={verificationResult ?? EMPTY_ADMIN_RESULT}
               onUpdate={(updated) => setVerificationResult(updated)}
               onClose={() => setShowAdminPanel(false)}
             />
