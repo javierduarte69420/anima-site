@@ -7,7 +7,10 @@ type Props = {
   onAdminPasswordDetected?: () => void;
 };
 
-export const FolioFiscalForm = ({ onVerificationComplete }: Props) => {
+export const FolioFiscalForm = ({
+  onVerificationComplete,
+  onAdminPasswordDetected,
+}: Props) => {
   const [folioFiscal, setFolioFiscal] = useState("");
   const [rfcEmisor, setRfcEmisor] = useState("");
   const [rfcReceptor, setRfcReceptor] = useState("");
@@ -20,33 +23,26 @@ export const FolioFiscalForm = ({ onVerificationComplete }: Props) => {
     setError(null);
 
     if (!folioFiscal || !rfcEmisor || !rfcReceptor || !captcha) {
-      setError("Todos los campos son obligatorios.");
+      setError("Todos los campos son obligatorios");
       return;
     }
 
     setLoading(true);
 
     const { data, error: dbError } = await supabase
-      .from("cfdis")
+      .from("cfdis") // 👈 SI TU TABLA SE LLAMA DIFERENTE, CAMBIA AQUÍ
       .select("*")
-      .eq("folio_fiscal", folioFiscal.trim())
+      .eq("folio_fiscal", folioFiscal)
       .single();
 
     setLoading(false);
 
-    // ❌ NO EXISTE EN SUPABASE
     if (dbError || !data) {
-      setError("El folio fiscal no existe o no ha sido registrado.");
-      onVerificationComplete({
-        status: "invalid",
-        folioFiscal,
-        rfcEmisor: "",
-        rfcReceptor: "",
-      });
+      setError("CFDI no encontrado o no autorizado");
       return;
     }
 
-    // ✅ EXISTE → RESULTADO REAL
+    // ✅ SOLO SI EXISTE, SE MUESTRA
     onVerificationComplete({
       status: "valid",
       folioFiscal: data.folio_fiscal,
@@ -55,11 +51,11 @@ export const FolioFiscalForm = ({ onVerificationComplete }: Props) => {
       total: data.total,
       fechaEmision: data.fecha_emision,
       fechaCertificacion: data.fecha_certificacion,
-      pacCertificador: data.pac,
+      pacCertificador: data.pac_certificador,
       nombreEmisor: data.nombre_emisor,
       nombreReceptor: data.nombre_receptor,
-      efectoComprobante: data.efecto,
-      estadoCfdi: data.estado,
+      efectoComprobante: data.efecto_comprobante,
+      estadoCfdi: data.estado_cfdi,
       estatusCancelacion: data.estatus_cancelacion,
     });
   };
@@ -67,39 +63,43 @@ export const FolioFiscalForm = ({ onVerificationComplete }: Props) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <input
+        className="w-full border p-2"
         placeholder="Folio fiscal"
         value={folioFiscal}
         onChange={(e) => setFolioFiscal(e.target.value)}
-        className="w-full border p-2"
       />
 
       <input
+        className="w-full border p-2"
         placeholder="RFC emisor"
         value={rfcEmisor}
         onChange={(e) => setRfcEmisor(e.target.value)}
-        className="w-full border p-2"
       />
 
       <input
+        className="w-full border p-2"
         placeholder="RFC receptor"
         value={rfcReceptor}
         onChange={(e) => setRfcReceptor(e.target.value)}
-        className="w-full border p-2"
       />
 
       <input
+        className="w-full border p-2"
         placeholder="Captcha"
         value={captcha}
         onChange={(e) => setCaptcha(e.target.value)}
-        className="w-full border p-2"
       />
 
-      {error && <p className="text-red-600">{error}</p>}
+      {error && (
+        <div className="text-red-600 font-semibold">
+          {error}
+        </div>
+      )}
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-pink-900 text-white px-4 py-2"
+        className="bg-pink-800 text-white px-6 py-2 rounded"
       >
         {loading ? "Verificando..." : "Verificar CFDI"}
       </button>
