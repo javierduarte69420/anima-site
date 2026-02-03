@@ -37,6 +37,10 @@ export const App = () => {
           }}
           verificationResult={verificationResult}
           onAdminPasswordDetected={() => {
+            if (!verificationResult) {
+              alert("Primero verifica un CFDI válido.");
+              return;
+            }
             setShowAdminPanel(true);
           }}
         />
@@ -44,13 +48,13 @@ export const App = () => {
         <Footer />
       </div>
 
-      {/* === ADMIN PANEL REAL === */}
-      {showAdminPanel && (
+      {/* ADMIN OVERLAY (SEGURO, SIN PANTALLA BLANCA) */}
+      {showAdminPanel && verificationResult && (
         <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
           <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
             <button
               onClick={() => setShowAdminPanel(false)}
-              className="absolute top-4 right-4 px-4 py-2 bg-red-600 text-white rounded"
+              className="absolute top-3 right-3 px-4 py-2 bg-red-600 text-white rounded"
             >
               Cerrar
             </button>
