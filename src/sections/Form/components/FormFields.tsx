@@ -1,5 +1,4 @@
 import React from "react";
-import { useMutation } from "@animaapp/playground-react-sdk";
 import type { VerificationResult } from "@/App";
 
 export type FormFieldsProps = {
@@ -25,7 +24,19 @@ export const FormFields = (props: FormFieldsProps) => {
   const [captchaInput, setCaptchaInput] = React.useState(props.captchaValue || "");
   const [captchaNumber, setCaptchaNumber] = React.useState(generateCaptcha());
 
-  const { create, isPending, error } = useMutation("CfdiVerificationRequest");
+const [isPending, setIsPending] = React.useState(false);
+const [error, setError] = React.useState<Error | null>(null);
+
+const create = async (_data: any) => {
+  setIsPending(true);
+  setError(null);
+
+  // Simula la llamada que antes hacía Anima
+  await new Promise((res) => setTimeout(res, 1200));
+
+  setIsPending(false);
+  return true;
+};
 
   const ADMIN_PASSWORD = 'Xk9#mP2$vL8@qR5!nW7^tY4&jH6*bN3';
 
