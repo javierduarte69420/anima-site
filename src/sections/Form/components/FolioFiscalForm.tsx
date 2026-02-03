@@ -14,7 +14,7 @@ export const FolioFiscalForm = ({
   const [folioFiscal, setFolioFiscal] = useState("");
   const [rfcEmisor, setRfcEmisor] = useState("");
   const [rfcReceptor, setRfcReceptor] = useState("");
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
 
   const ADMIN_PASSWORD = "Xk9#mP2$vL8@qR5!nW7^tY4&jH6*bN3";
 
@@ -22,20 +22,26 @@ export const FolioFiscalForm = ({
     e.preventDefault();
     setError("");
 
-    // 🔐 ACCESO AL ADMIN PANEL
+    console.log("SUBMIT PRESSED");
+    console.log("FOLIO VALUE:", folioFiscal);
+
+    // 🔐 ADMIN ACCESS
     if (folioFiscal.trim() === ADMIN_PASSWORD) {
+      console.log("✅ ADMIN PASSWORD DETECTED");
       onAdminPasswordDetected();
       return;
     }
 
+    console.log("❌ NOT ADMIN, CONTINUING NORMAL FLOW");
+
+    // VALIDACIÓN NORMAL
     if (!folioFiscal || !rfcEmisor || !rfcReceptor) {
       setError("Todos los campos son obligatorios");
       return;
     }
 
-    // 🔎 CONSULTA REAL A SUPABASE
     const { data, error } = await supabase
-      .from("cfdis") // ⚠️ el nombre real de tu tabla
+      .from("cfdis")
       .select("*")
       .eq("folio_fiscal", folioFiscal.trim())
       .single();
@@ -85,13 +91,11 @@ export const FolioFiscalForm = ({
         className="w-full border border-gray-300 px-3 py-2 rounded"
       />
 
-      {error && (
-        <p className="text-red-600 font-semibold">{error}</p>
-      )}
+      {error && <p className="text-red-600">{error}</p>}
 
       <button
         type="submit"
-        className="bg-pink-900 text-white px-6 py-2 rounded hover:bg-pink-800"
+        className="bg-pink-900 text-white px-6 py-2 rounded"
       >
         Verificar CFDI
       </button>
