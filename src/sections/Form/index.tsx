@@ -1,11 +1,10 @@
-import React, { useState } from "react";
-import type { VerificationResult } from "@/App";
 import { Main } from "@/sections/Main";
+import type { VerificationResult } from "@/App";
 
-type FormProps = {
+export type FormProps = {
   onVerificationComplete: (result: VerificationResult) => void;
   verificationResult: VerificationResult | null;
-  onAdminPasswordDetected?: (password: string) => void;
+  onAdminPasswordDetected?: () => void;
 };
 
 export const Form = ({
@@ -13,30 +12,17 @@ export const Form = ({
   verificationResult,
   onAdminPasswordDetected,
 }: FormProps) => {
-  const [folioFiscal, setFolioFiscal] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // 👉 SI ES CONTRASEÑA ADMIN, LA PASAMOS TAL CUAL
-    if (onAdminPasswordDetected) {
-      onAdminPasswordDetected(folioFiscal);
-      return;
-    }
-
-    // flujo normal CFDI (temporal)
-    onVerificationComplete({
-      status: "invalid",
-      folioFiscal,
-    });
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="box-border">
+    <form
+      className="box-border caret-transparent"
+      onSubmit={(e) => {
+        e.preventDefault(); // ⬅️ CRÍTICO: evita recarga / pantalla blanca
+      }}
+    >
       <Main
-        folioFiscal={folioFiscal}
-        setFolioFiscal={setFolioFiscal}
+        onVerificationComplete={onVerificationComplete}
         verificationResult={verificationResult}
+        onAdminPasswordDetected={onAdminPasswordDetected}
       />
     </form>
   );
