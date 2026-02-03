@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@animaapp/playground-react-sdk';
 import type { VerificationResult } from '@/App';
 
 export type AdminPanelProps = {
