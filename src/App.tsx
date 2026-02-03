@@ -35,16 +35,9 @@ export const App = () => {
           onVerificationComplete={(result) => {
             setVerificationResult(result);
           }}
-          verificationResult={
-            verificationResult?.status === "valid"
-              ? verificationResult
-              : null
-          }
+          verificationResult={verificationResult}
           onAdminPasswordDetected={() => {
-            if (!verificationResult || verificationResult.status !== "valid") {
-              alert("Primero verifica un CFDI válido.");
-              return;
-            }
+            // ✅ ABRE ADMIN DIRECTO, SIN VALIDAR CFDI
             setShowAdminPanel(true);
           }}
         />
@@ -52,7 +45,8 @@ export const App = () => {
         <Footer />
       </div>
 
-      {showAdminPanel && verificationResult?.status === "valid" && (
+      {/* ADMIN OVERLAY */}
+      {showAdminPanel && (
         <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
           <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
             <button
