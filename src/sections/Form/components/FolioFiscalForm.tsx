@@ -15,12 +15,19 @@ export const FolioFiscalForm = ({
   const [rfcEmisor, setRfcEmisor] = useState("");
   const [rfcReceptor, setRfcReceptor] = useState("");
   const [captcha, setCaptcha] = useState("");
-  const [error, setError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // 🔐 Acceso oculto al admin
+    if (folioFiscal === "_ADMIN_") {
+      onAdminPasswordDetected?.();
+      return;
+    }
 
     if (!folioFiscal || !rfcEmisor || !rfcReceptor || !captcha) {
       setError("Todos los campos son obligatorios");
@@ -29,20 +36,19 @@ export const FolioFiscalForm = ({
 
     setLoading(true);
 
-    const { data, error: dbError } = await supabase
-      .from("cfdis") // 👈 SI TU TABLA SE LLAMA DIFERENTE, CAMBIA AQUÍ
+    const { data, error } = await supabase
+      .from("cfdis") // 👈 TU TABLA REAL
       .select("*")
-      .eq("folio_fiscal", folioFiscal)
+      .eq("folio_fiscal", folioFiscal.trim())
       .single();
 
     setLoading(false);
 
-    if (dbError || !data) {
+    if (error || !data) {
       setError("CFDI no encontrado o no autorizado");
       return;
     }
 
-    // ✅ SOLO SI EXISTE, SE MUESTRA
     onVerificationComplete({
       status: "valid",
       folioFiscal: data.folio_fiscal,
@@ -61,48 +67,74 @@ export const FolioFiscalForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        className="w-full border p-2"
-        placeholder="Folio fiscal"
-        value={folioFiscal}
-        onChange={(e) => setFolioFiscal(e.target.value)}
-      />
+    <form onSubmit={handleSubmit}>
+      <div className="mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm text-gray-700 mb-1">
+              Folio fiscal
+            </label>
+            <input
+              type="text"
+              value={folioFiscal}
+              onChange={(e) => setFolioFiscal(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded"
+            />
+          </div>
 
-      <input
-        className="w-full border p-2"
-        placeholder="RFC emisor"
-        value={rfcEmisor}
-        onChange={(e) => setRfcEmisor(e.target.value)}
-      />
+          <div>
+            <label className="block text-sm text-gray-700 mb-1">
+              RFC emisor
+            </label>
+            <input
+              type="text"
+              value={rfcEmisor}
+              onChange={(e) => setRfcEmisor(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded"
+            />
+          </div>
 
-      <input
-        className="w-full border p-2"
-        placeholder="RFC receptor"
-        value={rfcReceptor}
-        onChange={(e) => setRfcReceptor(e.target.value)}
-      />
-
-      <input
-        className="w-full border p-2"
-        placeholder="Captcha"
-        value={captcha}
-        onChange={(e) => setCaptcha(e.target.value)}
-      />
-
-      {error && (
-        <div className="text-red-600 font-semibold">
-          {error}
+          <div>
+            <label className="block text-sm text-gray-700 mb-1">
+              RFC receptor
+            </label>
+            <input
+              type="text"
+              value={rfcReceptor}
+              onChange={(e) => setRfcReceptor(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded"
+            />
+          </div>
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-pink-800 text-white px-6 py-2 rounded"
-      >
-        {loading ? "Verificando..." : "Verificar CFDI"}
-      </button>
+        <div className="mt-4 flex items-center gap-4">
+          <div className="bg-gray-200 px-4 py-2 text-lg font-mono tracking-widest">
+            12345
+          </div>
+
+          <input
+            type="text"
+            placeholder="Proporcione los dígitos de la imagen"
+            value={captcha}
+            onChange={(e) => setCaptcha(e.target.value)}
+            className="border border-gray-300 px-3 py-2 rounded w-64"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="ml-auto bg-[#7a1f3d] text-white px-6 py-2 rounded hover:bg-[#5e162e]"
+          >
+            {loading ? "Verificando..." : "Verificar CFDI"}
+          </button>
+        </div>
+
+        {error && (
+          <div className="mt-4 text-red-700 text-sm font-semibold">
+            {error}
+          </div>
+        )}
+      </div>
     </form>
   );
 };
