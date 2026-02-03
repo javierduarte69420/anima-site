@@ -1,7 +1,8 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import type { VerificationResult } from "@/App";
 
 type Props = {
-  onVerificationComplete: (result: any) => void;
+  onVerificationComplete: (result: VerificationResult) => void;
   onAdminPasswordDetected?: () => void;
 };
 
@@ -11,77 +12,100 @@ export const FolioFiscalForm = ({
   onVerificationComplete,
   onAdminPasswordDetected,
 }: Props) => {
-  const [folio, setFolio] = useState("");
+  const [folioFiscal, setFolioFiscal] = useState("");
   const [rfcEmisor, setRfcEmisor] = useState("");
   const [rfcReceptor, setRfcReceptor] = useState("");
   const [captcha, setCaptcha] = useState("");
+  const [captchaValue] = useState("12345"); // SIMULACIÓN VISUAL
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // ⬅️ ESTO ERA CLAVE
-
+    e.preventDefault();
     setError(null);
 
     // 🔐 ADMIN ACCESS
-    if (folio === ADMIN_PASSWORD) {
+    if (folioFiscal.trim() === ADMIN_PASSWORD) {
+      if (captcha !== captchaValue) {
+        setError("Captcha incorrecto.");
+        return;
+      }
+
       onAdminPasswordDetected?.();
       return;
     }
 
-    // 🧪 CAPTCHA FAKE (obligatorio)
-    if (captcha.trim() !== "12345") {
-      setError("Captcha incorrecto");
+    // ❌ VALIDACIONES NORMALES
+    if (!folioFiscal || !rfcEmisor || !rfcReceptor || !captcha) {
+      setError("Todos los campos son obligatorios.");
       return;
     }
 
-    // ❌ NO EXISTE CFDI
-    setError("El CFDI no fue encontrado");
+    if (captcha !== captchaValue) {
+      setError("Captcha incorrecto.");
+      return;
+    }
+
+    // ❌ CFDI NO EXISTE → ERROR
+    setError("El CFDI no fue encontrado o no existe.");
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 border rounded-md">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-6 border rounded-md mt-6"
+    >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <input
+          type="text"
           placeholder="Folio fiscal"
-          value={folio}
-          onChange={(e) => setFolio(e.target.value)}
-          className="border p-2"
+          value={folioFiscal}
+          onChange={(e) => setFolioFiscal(e.target.value)}
+          className="border p-2 rounded"
         />
+
         <input
+          type="text"
           placeholder="RFC emisor"
           value={rfcEmisor}
           onChange={(e) => setRfcEmisor(e.target.value)}
-          className="border p-2"
+          className="border p-2 rounded"
         />
+
         <input
+          type="text"
           placeholder="RFC receptor"
           value={rfcReceptor}
           onChange={(e) => setRfcReceptor(e.target.value)}
-          className="border p-2"
+          className="border p-2 rounded"
         />
       </div>
 
-      {/* CAPTCHA RESTAURADO */}
-      <div className="flex items-center gap-4 mb-4">
-        <div className="border px-4 py-2 bg-gray-100 font-mono">
-          12345
+      {/* CAPTCHA */}
+      <div className="flex items-center gap-4 mt-4">
+        <div className="bg-gray-200 px-4 py-2 font-mono text-lg tracking-widest">
+          {captchaValue}
         </div>
+
         <input
+          type="text"
           placeholder="Proporcione los dígitos de la imagen"
           value={captcha}
           onChange={(e) => setCaptcha(e.target.value)}
-          className="border p-2 flex-1"
+          className="border p-2 rounded flex-1"
         />
+
+        <button
+          type="submit"
+          className="bg-[#7b1e3a] text-white px-6 py-2 rounded hover:bg-[#5e162c]"
+        >
+          Verificar CFDI
+        </button>
       </div>
 
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-
-      <button
-        type="submit"
-        className="bg-pink-800 text-white px-6 py-2 rounded"
-      >
-        Verificar CFDI
-      </button>
+      {/* ERROR */}
+      {error && (
+        <p className="text-red-600 mt-4 font-medium">{error}</p>
+      )}
     </form>
   );
 };
