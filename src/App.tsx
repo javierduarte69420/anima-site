@@ -21,47 +21,52 @@ export type VerificationResult = {
 };
 
 export const App = () => {
-  const [showResult, setShowResult] = useState(false);
   const [verificationResult, setVerificationResult] =
     useState<VerificationResult | null>(null);
+
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
-  const handleVerificationComplete = (result: VerificationResult) => {
-    setVerificationResult(result);
-    setShowResult(true);
-  };
-
-  const handleAdminUpdate = (result: VerificationResult) => {
-    setVerificationResult(result);
-  };
-
-  const handleAdminPasswordDetected = () => {
-    if (!verificationResult) {
-      alert("Primero verifica un CFDI antes de abrir el panel admin");
-      return;
-    }
-    setShowAdminPanel(true);
-  };
-
   return (
-    <div className="min-h-screen bg-white text-neutral-700">
-      <Header />
+    <>
+      <div className="min-h-screen bg-white">
+        <Header />
 
-      <Form
-        onVerificationComplete={handleVerificationComplete}
-        verificationResult={showResult ? verificationResult : null}
-        onAdminPasswordDetected={handleAdminPasswordDetected}
-      />
-
-      <Footer />
-
-      {showAdminPanel && verificationResult && (
-        <Admin
+        <Form
+          onVerificationComplete={(result) => {
+            setVerificationResult(result);
+          }}
           verificationResult={verificationResult}
-          onUpdate={handleAdminUpdate}
-          onClose={() => setShowAdminPanel(false)}
+          onAdminPasswordDetected={() => {
+            if (!verificationResult) {
+              alert("Primero verifica un CFDI antes de abrir el panel admin");
+              return;
+            }
+            setShowAdminPanel(true);
+          }}
         />
+
+        <Footer />
+      </div>
+
+      {/* ADMIN OVERLAY */}
+      {showAdminPanel && verificationResult && (
+        <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
+          <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
+            <button
+              onClick={() => setShowAdminPanel(false)}
+              className="absolute top-3 right-3 px-4 py-2 bg-red-600 text-white rounded"
+            >
+              Cerrar
+            </button>
+
+            <Admin
+              verificationResult={verificationResult}
+              onUpdate={(updated) => setVerificationResult(updated)}
+              onClose={() => setShowAdminPanel(false)}
+            />
+          </div>
+        </div>
       )}
-    </div>
+    </>
   );
 };
