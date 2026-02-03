@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Header } from "@/sections/Header";
 import { Form } from "@/sections/Form";
 import { Footer } from "@/sections/Footer";
+import { Admin } from "@/sections/Admin";
 
 export type VerificationResult = {
   status: "valid" | "invalid";
@@ -43,28 +44,22 @@ export const App = () => {
         <Footer />
       </div>
 
-      {/* === ADMIN OVERLAY (TEST) === */}
+      {/* === ADMIN PANEL REAL === */}
       {showAdminPanel && (
         <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
-          <div className="bg-white w-[90%] max-w-4xl p-10 rounded-lg shadow-xl">
-            <h1 className="text-2xl font-bold mb-4">
-              ADMIN PANEL ABIERTO
-            </h1>
-
-            <p className="mb-4 text-gray-600">
-              Si ves este mensaje, el admin SÍ se está abriendo correctamente.
-            </p>
-
-            <pre className="p-4 bg-gray-100 rounded text-xs overflow-auto max-h-[300px]">
-              {JSON.stringify(verificationResult, null, 2)}
-            </pre>
-
+          <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
             <button
               onClick={() => setShowAdminPanel(false)}
-              className="mt-6 px-6 py-2 bg-red-600 text-white rounded"
+              className="absolute top-4 right-4 px-4 py-2 bg-red-600 text-white rounded"
             >
               Cerrar
             </button>
+
+            <Admin
+              verificationResult={verificationResult}
+              onUpdate={(updated) => setVerificationResult(updated)}
+              onClose={() => setShowAdminPanel(false)}
+            />
           </div>
         </div>
       )}
