@@ -1,86 +1,38 @@
 import React, { useState } from "react";
-import { Header } from "@/sections/Header";
-import { Form } from "@/sections/Form";
-import { Footer } from "@/sections/Footer";
-import { Admin } from "@/sections/Admin";
-
-export type VerificationResult = {
-  status: "valid" | "invalid";
-  folioFiscal: string;
-  rfcEmisor: string;
-  rfcReceptor: string;
-  total?: string;
-  fechaEmision?: string;
-  fechaCertificacion?: string;
-  pacCertificador?: string;
-  nombreEmisor?: string;
-  nombreReceptor?: string;
-  efectoComprobante?: string;
-  estadoCfdi?: string;
-  estatusCancelacion?: string;
-};
-
-// ✅ OBJETO SEGURO PARA ADMIN
-const EMPTY_ADMIN_RESULT: VerificationResult = {
-  status: "valid",
-  folioFiscal: "",
-  rfcEmisor: "",
-  rfcReceptor: "",
-  total: "",
-  fechaEmision: "",
-  fechaCertificacion: "",
-  pacCertificador: "",
-  nombreEmisor: "",
-  nombreReceptor: "",
-  efectoComprobante: "",
-  estadoCfdi: "",
-  estatusCancelacion: "",
-};
 
 export const App = () => {
-  const [verificationResult, setVerificationResult] =
-    useState<VerificationResult | null>(null);
-
-  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <div className="min-h-screen bg-white">
-        <Header />
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6">
+      <h1 className="text-2xl font-bold">TEST ADMIN</h1>
 
-        <Form
-          onVerificationComplete={(result) => {
-            setVerificationResult(result);
-          }}
-          verificationResult={verificationResult}
-          onAdminPasswordDetected={() => {
-            // 🔓 ABRIR ADMIN SIN CFDI
-            setShowAdminPanel(true);
-          }}
-        />
+      <button
+        onClick={() => {
+          alert("CLICK FUNCIONA");
+          setOpen(true);
+        }}
+        className="px-6 py-3 bg-black text-white rounded"
+      >
+        Abrir Admin
+      </button>
 
-        <Footer />
-      </div>
+      {open && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+          <div className="bg-white p-10 rounded text-center">
+            <h2 className="text-xl font-bold text-green-600">
+              ADMIN ABIERTO
+            </h2>
 
-      {/* 🔐 ADMIN PANEL (NUNCA NULL) */}
-      {showAdminPanel && (
-        <div className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center">
-          <div className="bg-white w-[95%] max-w-6xl max-h-[90vh] overflow-auto rounded-lg shadow-xl relative">
             <button
-              onClick={() => setShowAdminPanel(false)}
-              className="absolute top-3 right-3 px-4 py-2 bg-red-600 text-white rounded"
+              onClick={() => setOpen(false)}
+              className="mt-6 px-6 py-2 bg-red-600 text-white rounded"
             >
               Cerrar
             </button>
-
-            <Admin
-              verificationResult={verificationResult ?? EMPTY_ADMIN_RESULT}
-              onUpdate={(updated) => setVerificationResult(updated)}
-              onClose={() => setShowAdminPanel(false)}
-            />
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
