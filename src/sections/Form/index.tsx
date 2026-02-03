@@ -1,5 +1,5 @@
-import type { VerificationResult } from "@/App";
 import { Main } from "@/sections/Main";
+import type { VerificationResult } from "@/App";
 
 export type FormProps = {
   onVerificationComplete: (result: VerificationResult) => void;
